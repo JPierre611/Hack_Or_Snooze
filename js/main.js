@@ -7,6 +7,9 @@ const $body = $("body");
 const $storiesLoadingMsg = $("#stories-loading-msg");
 const $allStoriesList = $("#all-stories-list");
 
+const $navSubmitStory = $("#nav-submit-story");
+const $submitForm = $("#submit-form");
+
 const $loginForm = $("#login-form");
 const $signupForm = $("#signup-form");
 

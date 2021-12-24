@@ -3,6 +3,9 @@
 // This is the global list of the stories, an instance of StoryList
 let storyList;
 
+// This is an error message alert used if there is a failure to add a new story.
+const newStoryFailure = "Failure to add a new story."
+
 /** Get and show stories when site first loads. */
 
 async function getAndShowStoriesOnStart() {
@@ -50,3 +53,23 @@ function putStoriesOnPage() {
 
   $allStoriesList.show();
 }
+
+/** Handle submit form submission. */
+
+async function submit(evt) {
+  console.debug("submit", evt);
+  evt.preventDefault();
+
+  const author = $("#create-author").val();
+  const title = $("#create-title").val();
+  const url = $("#create-url").val();
+
+  let newStory = await storyList.addStory(currentUser, {title: title, author: author, url: url});
+
+  if (newStory instanceof Story) {
+    $submitForm.hide();
+    getAndShowStoriesOnStart();
+  }
+}
+
+$submitForm.on("submit", submit);

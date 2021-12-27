@@ -73,27 +73,19 @@ class StoryList {
    * Returns the new Story instance
    */
 
-  async addStory(user, story) {
-
-    const {title, author, url} = story;
+  async addStory(user, { title, author, url }) {
+    const token = user.loginToken;
     const response = await axios({
       url: `${BASE_URL}/stories`,
       method: "POST",
-      data : { token: user.loginToken, story: {title, author, url } }
+      data : { token, story: { title, author, url } }
     });
 
-    let newStory = response.data.story;
+    const story = new Story(response.data.story);
+    this.stories.unshift(story);
+    user.ownStories.unshift(story);
 
-    return new Story(
-      {
-        storyId : newStory.storyId,
-        title : newStory.title,
-        author : newStory.author,
-        url : newStory.url,
-        username : newStory.username,
-        createdAt : newStory.createdAt
-      }
-    );
+    return story;
     
   }
 }
@@ -212,5 +204,44 @@ class User {
       console.error("loginViaStoredCredentials failed", err);
       return null;
     }
+  }
+
+  /** Add a story to the list of user's favorites and update the API
+   *  - story: a Story instance to add to favorites
+   */
+
+  async addFavorite(story) {
+    this.favorites.push(story);
+    await this._addOrRemoveFavorites("add", story);
+  }
+
+  /** Remove the story from the list of user's favorites and update the API
+   *  - story: a Story instance to remove from favorites
+   */
+
+   async removeFavorite(story) {
+    this.favorites = this.favorites.filter(s => s.storyId !== story.storyId);
+    await this._addOrRemoveFavorites("remove", story);
+  }
+
+  /** API function to add or remove story to/from list of favorites
+   *  - func: "add" or "remove"
+   *  - story: Story instance to add or remove to/from favorite list
+   */
+
+  async _addOrRemoveFavorites(func, story) {
+    const method = func === "add" ? "POST" : "DELETE";
+    const token = this.loginToken;
+    await axios({
+      url : `${BASE_URL}/users/${this.username}/favorites/${story.storyId}`,
+      method: method,
+      data: { token }
+    });
+  }
+
+  /** Returns true/false whether the given story instance is a favorite of this user. */
+
+  isFavorite(story) {
+    return this.favorites.some(s => s.storyId === story.storyId);
   }
 }

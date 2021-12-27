@@ -26,8 +26,13 @@ function generateStoryMarkup(story) {
   // console.debug("generateStoryMarkup", story);
 
   const hostName = story.getHostName();
+
+  // if a user is logged in, show favorite/not-favorite checkbox
+  const showCheckbox = Boolean(currentUser);
+
   return $(`
       <li id="${story.storyId}">
+        ${showCheckbox ? getCheckboxHTML(story, currentUser) : ""} 
         <a href="${story.url}" target="a_blank" class="story-link">
           ${story.title}
         </a>
@@ -36,6 +41,22 @@ function generateStoryMarkup(story) {
         <small class="story-user">posted by ${story.username}</small>
       </li>
     `);
+}
+
+/** Display a checkbox. If story instance ia a favorite of the given user, check the checkbox. */
+
+function getCheckboxHTML(story, user) {
+  const isFavorite = user.isFavorite(story);
+  if (isFavorite) {
+    return `
+      <span>
+        <input type="checkbox" id="fav-story" checked>
+      </span>`;
+  }
+  return `
+    <span>
+      <input type="checkbox" id="fav-story">
+    </span>`;
 }
 
 /** Gets list of stories from server, generates their HTML, and puts on page. */
@@ -54,22 +75,26 @@ function putStoriesOnPage() {
   $allStoriesList.show();
 }
 
-/** Handle submit form submission. */
+/** Handle submitting new story form. */
 
-async function submit(evt) {
-  console.debug("submit", evt);
+async function submitNewStory(evt) {
+  console.debug("submitNewStory");
   evt.preventDefault();
 
   const author = $("#create-author").val();
   const title = $("#create-title").val();
   const url = $("#create-url").val();
+  const username = currentUser.username;
+  const storyData = { title, author, url, username };
 
-  let newStory = await storyList.addStory(currentUser, {title: title, author: author, url: url});
+  const newStory = await storyList.addStory(currentUser, storyData);
 
-  if (newStory instanceof Story) {
-    $submitForm.hide();
-    getAndShowStoriesOnStart();
-  }
+  const $newStory = generateStoryMarkup(newStory);
+  $allStoriesList.prepend($newStory);
+
+  // hide the form and reset it
+  $submitForm.hide();
+  $submitForm.trigger("reset");
 }
 
-$submitForm.on("submit", submit);
+$submitForm.on("submit", submitNewStory);

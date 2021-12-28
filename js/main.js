@@ -9,6 +9,8 @@ const $allStoriesList = $("#all-stories-list");
 
 const $navSubmitStory = $("#nav-submit-story");
 const $submitForm = $("#submit-form");
+const $navFavorites = $("#nav-favorites");
+const $favoriteStoriesList = $("#favorite-stories-list");
 
 const $loginForm = $("#login-form");
 const $signupForm = $("#signup-form");
@@ -27,7 +29,8 @@ function hidePageComponents() {
     $allStoriesList,
     $loginForm,
     $signupForm,
-    $submitForm
+    $submitForm,
+    $favoriteStoriesList
   ];
   components.forEach(c => c.hide());
 }

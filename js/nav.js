@@ -56,6 +56,16 @@ function navFavoritesClick() {
 
 $navFavorites.on ("click", navFavoritesClick);
 
+/** Show list of own stories on click on "my stories" */
+
+function navOwnStoriesClick() {
+  console.debug("navOwnStoriesClick");
+  hidePageComponents();
+  putOwnStoriesOnPage();
+}
+
+$navOwns.on ("click", navOwnStoriesClick);
+
 /** Toggle favorite status of stories when click on story checkbox from allStoriesList. */
 
 function toggleFavoriteStatus(evt) {
@@ -88,3 +98,16 @@ function turnOffFavoriteStatus(evt) {
 }
 
 $favoriteStoriesList.on("click", "input", turnOffFavoriteStatus);
+
+/** On the ownStoriesList, clicking on a story author's name will
+ *  delete the story from the StoryList, from the DOM and from the API.
+*/
+async function deleteStory(evt) {
+  console.debug("deleteStory");
+  const story = storyList.stories.find(s => s.storyId === evt.target.parentElement.id);
+  await storyList.removeStory(currentUser, story);
+  $ownStoriesList.hide();
+  putOwnStoriesOnPage();
+}
+
+$ownStoriesList.on("click", ".story-author", deleteStory);

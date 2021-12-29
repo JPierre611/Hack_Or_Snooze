@@ -96,6 +96,27 @@ function putFavoriteStoriesOnPage() {
   $favoriteStoriesList.show();
 }
 
+/** Gets list of own stories from the instance of the current user,
+ * generates their HTML, and puts on page. */
+
+ function putOwnStoriesOnPage() {
+  console.debug("putOwnStoriesOnPage");
+
+  $ownStoriesList.empty();
+
+  if (currentUser.ownStories.length === 0) {
+    $ownStoriesList.append("<h5>No stories added by user yet!</h5>")
+  } else {
+    // loop through all of our own stories and generate HTML for them
+    for (let story of currentUser.ownStories) {
+      const $story = generateStoryMarkup(story);
+      $ownStoriesList.append($story);
+    }
+  }
+
+  $ownStoriesList.show();
+}
+
 /** Handle submitting new story form. */
 
 async function submitNewStory(evt) {

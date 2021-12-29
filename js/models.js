@@ -25,7 +25,10 @@ class Story {
 
   getHostName() {
     // UNIMPLEMENTED: complete this function!
-    return "hostname.com";
+    // Note that the following was adapted from some code found on
+    // stackoverflow.com/questions/8498592/extract-hostname-name-from-string.
+    const hostname = this.url.split("/");
+    return (this.url.indexOf("//") > -1) ? hostname[2] : hostname[0];
   }
 }
 
@@ -86,7 +89,24 @@ class StoryList {
     user.ownStories.unshift(story);
 
     return story;
-    
+  }
+
+  /** Delete the story instance from the API and remove it from lists.
+   *  - user: the current User instance
+   *  - story: Story instance to remove from the story lists
+  */
+
+   async removeStory(user, story) {
+    const token = user.loginToken;
+    await axios({
+      url: `${BASE_URL}/stories/${story.storyId}`,
+      method: "DELETE",
+      data: { token }
+    });
+
+    this.stories = this.stories.filter(s => s.storyId !== story.storyId);
+    user.favorites = user.favorites.filter(s => s.storyId !== story.storyId);
+    user.ownStories = user.ownStories.filter(s => s.storyId !== story.storyId);
   }
 }
 
@@ -233,7 +253,7 @@ class User {
     const method = func === "add" ? "POST" : "DELETE";
     const token = this.loginToken;
     await axios({
-      url : `${BASE_URL}/users/${this.username}/favorites/${story.storyId}`,
+      url: `${BASE_URL}/users/${this.username}/favorites/${story.storyId}`,
       method: method,
       data: { token }
     });
